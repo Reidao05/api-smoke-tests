@@ -1,5 +1,5 @@
 import { request, APIRequestContext } from "@playwright/test";
-import type { EnvConfig } from "../config/env";
+import type { EnvConfig } from "../config/types";
 
 type CachedToken = {
   accessToken: string;

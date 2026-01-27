@@ -1,6 +1,6 @@
 import { APIRequestContext } from "@playwright/test";
-import { BaseApiClient } from "../api/BaseApiClient";
-import { withDns } from "../api/payload";
+import { BaseApiClient } from "./baseApiClient";
+import { withDns } from "../payloads/_shared/withDns";
 
 type WebApiListPayload = {
   Purpose_AP: boolean;

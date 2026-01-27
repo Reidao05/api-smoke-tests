@@ -1,8 +1,8 @@
-import { test, expect } from "../fixtures/api-fixture";
+import { test, expect } from "../../src/fixtures/apiFixture";
 import { AssistedSetupClient } from "../../src/clients/assistedSetup.client";
-import { validateWebApiListResponse } from "../../src/validators/webApiList.validator";
+import { validateWebApiListResponse } from "../../src/validators/assistedSetup/webApiList.validator";
 import { withFailureArtifacts } from "../../src/utils/withFailureArtifacts";
-import { resolveDns } from "../../src/api/payload";
+import { resolveDns } from "../../src/config/resolveDns";
 
 test("webApiList contract", async ({ api, envCfg }, testInfo) => {
   const dns = resolveDns(envCfg);

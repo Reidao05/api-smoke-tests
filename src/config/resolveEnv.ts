@@ -1,4 +1,4 @@
-import type {EnvName } from "./env";
+import type {EnvName } from "./types";
 
 export function resolveEnvName(): EnvName {
     const arg = process.argv.find(a => a.startsWith("--env="));

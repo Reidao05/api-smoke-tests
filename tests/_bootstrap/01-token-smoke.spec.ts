@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { loadEnvConfig } from "../../src/config/env";
+import { loadEnvConfig } from "../../src/config/types";
 import { resolveEnvName } from "../../src/config/resolveEnv";
-import { OAuthTokenService } from "../../src/api/oauthTokenService";
+import { OAuthTokenService } from "../../src/auth/oauthTokenService";
 
 test("gets an access token (cached)", async () => {
   const envName = resolveEnvName();

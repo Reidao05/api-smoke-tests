@@ -1,8 +1,8 @@
 import { APIRequestContext } from '@playwright/test';
 import {test as base, request} from '@playwright/test';
-import { loadEnvConfig } from '../../src/config/env';
-import { resolveEnvName } from '../../src/config/resolveEnv';
-import { OAuthTokenService } from '../../src/api/oauthTokenService';
+import { loadEnvConfig } from '../config/types';
+import { resolveEnvName } from '../config/resolveEnv';
+import { OAuthTokenService } from '../auth/oauthTokenService';
 
 type Fixtures ={
     envCfg: ReturnType<typeof loadEnvConfig>;

@@ -1,6 +1,6 @@
 
 import {test, expect } from '@playwright/test';
-import { loadEnvConfig } from '../../src/config/env';
+import { loadEnvConfig } from '../../src/config/types';
 import { resolveEnvName } from '../../src/config/resolveEnv';
 
 test('Loads All environment Config', async () => {
