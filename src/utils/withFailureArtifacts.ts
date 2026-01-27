@@ -2,7 +2,7 @@
 import type { TestInfo } from "@playwright/test";
 
 type AnyObj = Record<string, any>;
-
+const startedAT = Date.now();
 export type FailureArtifactsOptions = {
   /** Used for naming attachments */
   label?: string;
@@ -77,6 +77,7 @@ export async function withFailureArtifacts(
 
   const attachBundle = async (outcome: "pass" | "fail", error?: any): Promise<void> => {
     const maskedContext = resolveMaskedContext();
+    const durationMs = Date.now() - startedAT;
 
     const bundle: AnyObj = {
       label,
