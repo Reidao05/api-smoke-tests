@@ -1,0 +1,52 @@
+trigger: none   # manual for now
+
+pool:
+  vmImage: 'windows-latest'
+
+parameters:
+  - name: ENV
+    displayName: Environment
+    type: string
+    default: qa
+    values:
+      - qa
+      - test
+      - prod
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+    displayName: 'Use Node.js 20'
+
+  - script: |
+      npm ci
+    displayName: 'Install dependencies'
+
+  # Safe to keep even for API-only tests
+  - script: |
+      npx playwright install --with-deps
+    displayName: 'Install Playwright'
+
+  - powershell: |
+      $env:ENV = "${{ parameters.ENV }}"
+      npx playwright test tests/api
+    displayName: 'Run API smoke tests'
+    continueOnError: true
+
+  # OPTION 1 — Management view
+  - task: PublishTestResults@2
+    displayName: 'Publish JUnit test results'
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: 'test-results/junit.xml'
+      testRunTitle: 'API Smoke Tests (${{ parameters.ENV }})'
+      failTaskOnFailedTests: true
+
+  # OPTION 2 — Engineering view
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish Playwright HTML report'
+    inputs:
+      targetPath: 'playwright-report'
+      artifact: 'playwright-report'
+      publishLocation: 'pipeline'

@@ -1,0 +1,14 @@
+# Secrets
+.env
+.env.*
+env.*.local.json
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+
+# Node
+node_modules/
