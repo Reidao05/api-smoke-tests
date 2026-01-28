@@ -1,11 +1,10 @@
 import { APIRequestContext } from "@playwright/test";
 import { BaseApiClient } from "./baseApiClient";
-import { withDns } from "../payloads/_shared/withDns";
-
 type WebApiListPayload = {
   Purpose_AP: boolean;
   Purpose_APStatus: boolean;
   Purpose_BankStatements: boolean;
+  DNS: string;
 };
 
 type WebApiListResult = {
@@ -13,27 +12,44 @@ type WebApiListResult = {
   json: any;
 };
 
+type PaymentSpecListPayload = {
+  FormatId: string;
+  FormatGroup: string;
+  FormatGroupVersion: string;
+  APIName: string;
+  APIVersion: string;
+  Communication_FileBased: boolean;
+  Communication_WebAPIBased: boolean;
+  DNS: string;
+};
+
+type PaymentSpecListResult = {
+  status: number;
+  json: any;
+};
+type WebApiConfigDetailsPayload = {
+  APIName: string;
+  APIVersion: string;
+  DNS: string;
+};
+
+type WebApiConfigDetailsResult = {
+  status: number;
+  json: any;
+};
+
+
 export class AssistedSetupClient extends BaseApiClient {
   constructor(private readonly api: APIRequestContext) {
     super();
   }
 
-  async webApiList(
-    dns: string,
-    payload: WebApiListPayload = {
-      Purpose_AP: true,
-      Purpose_APStatus: false,
-      Purpose_BankStatements: false,
-    }
-  ): Promise<WebApiListResult> {
-    const body = withDns(payload, dns);
-
-    // 👇 capture request snapshot (minimal, safe)
+  async webApiList(body: WebApiListPayload): Promise<WebApiListResult> {
     this.captureRequest({
       method: "POST",
       url: "/api/assistedsetup/webapilist",
-      // Don't store Authorization here (fixture already sets it); safer.
       body,
+    
     });
 
     const res = await this.api.post("/api/assistedsetup/webapilist", { data: body });
@@ -45,31 +61,82 @@ export class AssistedSetupClient extends BaseApiClient {
     try {
       json = text ? JSON.parse(text) : null;
     } catch {
-      // capture response even if non-json
-      this.captureResponse({
-        status,
-        headers: res.headers(),
-        body: { rawText: text },
-      });
-
-      throw new Error(
-        `AssistedSetup.webApiList returned non-JSON\nStatus=${status}\nBody=${text}`
-      );
+      this.captureResponse({ status, headers: res.headers(), body: { rawText: text } });
+      throw new Error(`AssistedSetup.webApiList returned non-JSON\nStatus=${status}\nBody=${text}`);
     }
 
-    // 👇 capture response snapshot
-    this.captureResponse({
-      status,
-      headers: res.headers(),
-      body: json,
-    });
+    this.captureResponse({ status, headers: res.headers(), body: json });
 
     if (!res.ok()) {
-      throw new Error(
-        `AssistedSetup.webApiList failed\nStatus=${status}\nBody=${text}`
-      );
+      throw new Error(`AssistedSetup.webApiList failed\nStatus=${status}\nBody=${text}`);
     }
 
     return { status, json };
   }
+
+  async paymentSpecList(body: PaymentSpecListPayload): Promise<PaymentSpecListResult> {
+    this.captureRequest({
+      method: "POST",
+      url: "/api/assistedsetup/paymentspeclist",
+      body,
+    });
+
+    const res = await this.api.post("/api/assistedsetup/paymentspeclist", { data: body });
+
+    const status = res.status();
+    const text = await res.text();
+
+    let json: any;
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      this.captureResponse({ status, headers: res.headers(), body: { rawText: text } });
+      throw new Error(
+        `AssistedSetup.paymentSpecList returned non-JSON\nStatus=${status}\nBody=${text}`
+      );
+    }
+
+    this.captureResponse({ status, headers: res.headers(), body: json });
+
+    if (!res.ok()) {
+      throw new Error(`AssistedSetup.paymentSpecList failed\nStatus=${status}\nBody=${text}`);
+    }
+
+    return { status, json };
+  }
+  async webApiConfigDetails(
+  body: WebApiConfigDetailsPayload
+): Promise<WebApiConfigDetailsResult> {
+  this.captureRequest({
+    method: "POST",
+    url: "/api/assistedsetup/webapi/configdetails",
+    body,
+  });
+
+  const res = await this.api.post("/api/assistedsetup/webapi/configdetails", { data: body });
+
+  const status = res.status();
+  const text = await res.text();
+
+  let json: any;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    this.captureResponse({ status, headers: res.headers(), body: { rawText: text } });
+    throw new Error(
+      `AssistedSetup.webApiConfigDetails returned non-JSON\nStatus=${status}\nBody=${text}`
+    );
+  }
+
+  this.captureResponse({ status, headers: res.headers(), body: json });
+
+  if (!res.ok()) {
+    throw new Error(
+      `AssistedSetup.webApiConfigDetails failed\nStatus=${status}\nBody=${text}`
+    );
+  }
+
+  return { status, json };
+}
+
 }

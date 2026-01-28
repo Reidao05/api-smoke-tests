@@ -32,7 +32,11 @@ export const test = base.extend<Fixtures>({
                 'Content-Type': 'application/json'  
             }
         });
+        
         await use(api);
+        await api.dispose();
+       
     }
+    
 });
 export { expect } from "@playwright/test";

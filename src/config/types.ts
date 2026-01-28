@@ -11,6 +11,11 @@ export type EnvConfig = {
   subscription: string;
   scope: string;
   dns: string;
+  bankStatements: {
+    bai2: { company: string; bankAccountId: string };    
+    mt940: { company: string; bankAccountId: string };
+    wellsFargo: { company: string; bankAccountId: string };
+  };
 };
 
 export function loadEnvConfig(envName: EnvName): EnvConfig {
@@ -23,6 +28,19 @@ export function loadEnvConfig(envName: EnvName): EnvConfig {
     if (!value) {
       throw new Error(`Missing required env var: ${envVarName}`);
     }
+    if (!cfg.bankStatements?.bai2?.company)
+       throw new Error("Missing bankStatements.bai2.company in env json");
+    if (!cfg.bankStatements?.bai2?.bankAccountId) 
+      throw new Error("Missing bankStatements.bai2.bankAccountId in env json");
+    if (!cfg.bankStatements?.mt940?.company)
+      throw new Error("Missing bankStatements.mt940.company in env json");
+    if (!cfg.bankStatements?.mt940?.bankAccountId)
+      throw new Error("Missing bankStatements.mt940.bankAccountId in env json");
+    if (!cfg.bankStatements?.wellsFargo?.company)
+      throw new Error("Missing bankStatements.wellsFargo.company in env json");
+    if (!cfg.bankStatements?.wellsFargo?.bankAccountId)
+      throw new Error("Missing bankStatements.wellsFargo.bankAccountId in env json");
+
     return value;
   };
 
@@ -40,5 +58,19 @@ export function loadEnvConfig(envName: EnvName): EnvConfig {
     scope: resolveSecret(cfg.auth.scope),
 
     dns: cfg.dns,
+    bankStatements: {
+    bai2: {
+      company: cfg.bankStatements?.bai2?.company ?? "",
+      bankAccountId: cfg.bankStatements?.bai2?.bankAccountId ?? "",
+    },
+    mt940: {
+      company: cfg.bankStatements?.mt940?.company ?? "",
+      bankAccountId: cfg.bankStatements?.mt940?.bankAccountId ?? "",
+    },
+    wellsFargo: {
+      company: cfg.bankStatements?.wellsFargo?.company ?? "",
+      bankAccountId: cfg.bankStatements?.wellsFargo?.bankAccountId ?? "",
+    },
+    },
   };
 }

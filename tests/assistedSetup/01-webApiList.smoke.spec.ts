@@ -11,7 +11,13 @@ test("webApiList contract", async ({ api, envCfg }, testInfo) => {
   await withFailureArtifacts(
     testInfo,
     async () => {
-      const res = await client.webApiList(dns);
+      const res = await client.webApiList({
+        Purpose_AP: true,
+        Purpose_APStatus: false,
+        Purpose_BankStatements: false,
+        DNS: dns,
+      });
+
       expect(res.status).toBe(200);
       validateWebApiListResponse(res.json);
     },
