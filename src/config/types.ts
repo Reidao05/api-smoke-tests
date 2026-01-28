@@ -15,6 +15,7 @@ export type EnvConfig = {
     bai2: { company: string; bankAccountId: string };    
     mt940: { company: string; bankAccountId: string };
     wellsFargo: { company: string; bankAccountId: string };
+    camt053: { company: string; bankAccountId: string; accountNumber: string };
   };
 };
 
@@ -40,7 +41,12 @@ export function loadEnvConfig(envName: EnvName): EnvConfig {
       throw new Error("Missing bankStatements.wellsFargo.company in env json");
     if (!cfg.bankStatements?.wellsFargo?.bankAccountId)
       throw new Error("Missing bankStatements.wellsFargo.bankAccountId in env json");
-
+    if (!cfg.bankStatements?.camt053?.company)
+      throw new Error("Missing bankStatements.camt053.company in env json");
+    if (!cfg.bankStatements?.camt053?.bankAccountId)
+      throw new Error("Missing bankStatements.camt053.bankAccountId in env json");  
+    if (!cfg.bankStatements?.camt053?.accountNumber)
+      throw new Error("Missing bankStatements.camt053.accountNumber in env json");
     return value;
   };
 
@@ -71,6 +77,10 @@ export function loadEnvConfig(envName: EnvName): EnvConfig {
       company: cfg.bankStatements?.wellsFargo?.company ?? "",
       bankAccountId: cfg.bankStatements?.wellsFargo?.bankAccountId ?? "",
     },
+    camt053: {
+      company: cfg.bankStatements?.camt053?.company ?? "",
+      bankAccountId: cfg.bankStatements?.camt053?.bankAccountId ?? "",
+      accountNumber: cfg.bankStatements?.camt053?.accountNumber ?? "",
     },
-  };
-}
+  },
+}}
