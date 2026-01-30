@@ -1,87 +1,73 @@
-trigger: none   # manual for now
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - feature/*
+      - release/*
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: "windows-latest"
 
-parameters:
-  - name: ENV
-    displayName: Environment
-    type: string
-    default: qa
-    values:
-      - qa
-      - test
-      - prod
+variables:
+  ENV: "qa"
+  JUNIT_PATH: "test-results/junit.xml"
+  DASHBOARD_OUT_DIR: "artifacts"
 
 steps:
+  - checkout: self
+    clean: true
+
   - task: NodeTool@0
     inputs:
-      versionSpec: '20.x'
-    displayName: 'Use Node.js 20'
+      versionSpec: "20.x"
+    displayName: "Use Node 20"
 
   - script: |
       npm ci
-    displayName: 'Install dependencies'
+    displayName: "Install dependencies"
 
-  # Safe to keep even for API-only tests
   - script: |
       npx playwright install --with-deps
-    displayName: 'Install Playwright'
+    displayName: "Install Playwright browsers"
 
-  - powershell: |
-      $env:ENV = "${{ parameters.ENV }}"
-      npx playwright test tests/api
-    displayName: 'Run API smoke tests'
-    continueOnError: true
+  # Run tests and generate reports
+  - script: |
+      npx playwright test --reporter=junit,html
+    displayName: "Run Playwright tests (JUnit + HTML)"
+    env:
+      ENV: $(ENV)
 
-  - powershell: |
-      $env:ENV = "${{ parameters.ENV }}"
+  # Build dashboard summary (writes artifacts/dashboard-summary.json)
+  - script: |
       npm run dashboard:summary
-    displayName: 'Build dashboard summary'
-    condition: always()
+    displayName: "Build dashboard summary"
+    env:
+      ENV: $(ENV)
+      JUNIT_PATH: $(JUNIT_PATH)
+      DASHBOARD_OUT_DIR: $(DASHBOARD_OUT_DIR)
 
-  - powershell: |
-      $env:ENV = "${{ parameters.ENV }}"
-      npm run dashboard:render
-    displayName: 'Render dashboard HTML'
-    condition: always()
-
-  - task: PublishPipelineArtifact@1
-    displayName: 'Publish dashboard (HTML + JSON)'
-    inputs:
-      targetPath: 'artifacts'
-      artifact: 'dashboard'
-      publishLocation: 'pipeline'
-    condition: always()
-  
-  - powershell: |
-      Get-Content artifacts/dashboard-summary.json
-    displayName: 'Show dashboard summary'
-    condition: always()
-
-  # OPTION 1 — Management view
+  # Publish JUnit into Azure DevOps "Tests" tab
   - task: PublishTestResults@2
-    displayName: 'Publish JUnit test results'
+    displayName: "Publish JUnit test results"
     inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: 'test-results/junit.xml'
-      testRunTitle: 'API Smoke Tests (${{ parameters.ENV }})'
+      testResultsFormat: "JUnit"
+      testResultsFiles: "**/test-results/junit.xml"
       failTaskOnFailedTests: true
-    condition: always()
+      testRunTitle: "EnvShift Smoke ($(ENV))"
 
-  # OPTION 2 — Engineering view
+  # Publish dashboard artifact
   - task: PublishPipelineArtifact@1
-    displayName: 'Publish Playwright HTML report'
+    displayName: "Publish dashboard artifacts"
     inputs:
-      targetPath: 'playwright-report'
-      artifact: 'playwright-report'
-      publishLocation: 'pipeline'
-    condition: always()
+      targetPath: "$(System.DefaultWorkingDirectory)/artifacts"
+      artifact: "dashboard"
+      publishLocation: "pipeline"
 
+  # Publish Playwright HTML report
   - task: PublishPipelineArtifact@1
-    displayName: 'Publish dashboard summary'
+    displayName: "Publish Playwright HTML report"
     inputs:
-      targetPath: 'artifacts'
-      artifact: 'dashboard'
-      publishLocation: 'pipeline'
-    condition: always()
+      targetPath: "$(System.DefaultWorkingDirectory)/playwright-report"
+      artifact: "playwright-report"
+      publishLocation: "pipeline"
