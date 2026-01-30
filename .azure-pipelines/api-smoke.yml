@@ -34,6 +34,31 @@ steps:
     displayName: 'Run API smoke tests'
     continueOnError: true
 
+  - powershell: |
+      $env:ENV = "${{ parameters.ENV }}"
+      npm run dashboard:summary
+    displayName: 'Build dashboard summary'
+    condition: always()
+
+  - powershell: |
+      $env:ENV = "${{ parameters.ENV }}"
+      npm run dashboard:render
+    displayName: 'Render dashboard HTML'
+    condition: always()
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish dashboard (HTML + JSON)'
+    inputs:
+      targetPath: 'artifacts'
+      artifact: 'dashboard'
+      publishLocation: 'pipeline'
+    condition: always()
+  
+  - powershell: |
+      Get-Content artifacts/dashboard-summary.json
+    displayName: 'Show dashboard summary'
+    condition: always()
+
   # OPTION 1 — Management view
   - task: PublishTestResults@2
     displayName: 'Publish JUnit test results'
@@ -42,6 +67,7 @@ steps:
       testResultsFiles: 'test-results/junit.xml'
       testRunTitle: 'API Smoke Tests (${{ parameters.ENV }})'
       failTaskOnFailedTests: true
+    condition: always()
 
   # OPTION 2 — Engineering view
   - task: PublishPipelineArtifact@1
@@ -50,3 +76,12 @@ steps:
       targetPath: 'playwright-report'
       artifact: 'playwright-report'
       publishLocation: 'pipeline'
+    condition: always()
+
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish dashboard summary'
+    inputs:
+      targetPath: 'artifacts'
+      artifact: 'dashboard'
+      publishLocation: 'pipeline'
+    condition: always()

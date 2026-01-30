@@ -4,6 +4,8 @@ import { BaseApiClient } from "./baseApiClient";
 type ImportBankStatementsPayload = Record<string, any>;
 type ImportBankStatementsResult = { status: number; json: any };
 
+const BUSINESS_STATUSES = new Set([412]); // expand later if needed: 400, 409, 422
+
 export class BankStatementsClient extends BaseApiClient {
   constructor(private readonly api: APIRequestContext) {
     super();
@@ -29,9 +31,9 @@ export class BankStatementsClient extends BaseApiClient {
       throw new Error(`BankStatements.import returned non-JSON\nStatus=${status}\nBody=${text}`);
     }
 
-    this.captureResponse({ status, headers: res.headers(), body: json });
+    this.captureResponse({ status, headers: res.headers(), body: json ?? { rawText: text } });
 
-    if (!res.ok()) {
+    if (!res.ok() && !BUSINESS_STATUSES.has(status)) {
       throw new Error(`BankStatements.import failed\nStatus=${status}\nBody=${text}`);
     }
 

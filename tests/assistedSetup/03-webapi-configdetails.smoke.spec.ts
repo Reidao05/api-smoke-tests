@@ -5,47 +5,52 @@ import { resolveDns } from "../../src/config/resolveDns";
 import { buildWebApiConfigDetailsRequest } from "../../src/payloads/assistedSetup/webApiConfigDetails.payload";
 import { validateWebApiConfigDetailsResponse } from "../../src/validators/assistedSetup/webApiConfigDetails.validator";
 
-test("Assisted Setup → webapi/configdetails (discovered APIName/APIVersion)", async ({ api, envCfg }, testInfo) => {
-  const client = new AssistedSetupClient(api);
-  const dns = resolveDns(envCfg);
+import { addTestMeta } from "../../src/utils/testMeta";
 
-  await withFailureArtifacts(
-    testInfo,
-    async () => {
-      // Discover APIName/APIVersion
-      const web = await client.webApiList({
-        Purpose_AP: true,
-        Purpose_APStatus: false,
-        Purpose_BankStatements: false,
-        DNS: dns,
-      });
+test.describe("@smoke @critical @cap:assisted-setup", () => {
+    test("Assisted Setup → webapi/configdetails (discovered Web Config Details)", async ({ api, envCfg }, testInfo) => {
+      addTestMeta(testInfo, { capability: "assisted-setup", smoke: true, critical: true });
+      const client = new AssistedSetupClient(api);
+      const dns = resolveDns(envCfg);
 
-      expect(web.status).toBe(200);
+      await withFailureArtifacts(
+        testInfo,
+        async () => {
+          // Discover APIName/APIVersion
+          const web = await client.webApiList({
+            Purpose_AP: true,
+            Purpose_APStatus: false,
+            Purpose_BankStatements: false,
+            DNS: dns,
+          });
 
-      const apis = Array.isArray(web.json?.WebAPIs) ? web.json.WebAPIs : [];
-      const picked = apis.find((a: any) => typeof a?.Name === "string" && typeof a?.Version === "string");
+          expect(web.status).toBe(200);
 
-      if (!picked) {
-        throw new Error(`No APIName/APIVersion discovered from webApiList. WebAPIs length=${apis.length}`);
-      }
+          const apis = Array.isArray(web.json?.WebAPIs) ? web.json.WebAPIs : [];
+          const picked = apis.find((a: any) => typeof a?.Name === "string" && typeof a?.Version === "string");
 
-      // Build payload + call endpoint
-      const body = buildWebApiConfigDetailsRequest(picked.Name, picked.Version, dns);
-      const res = await client.webApiConfigDetails(body);
+          if (!picked) {
+            throw new Error(`No APIName/APIVersion discovered from webApiList. WebAPIs length=${apis.length}`);
+          }
 
-      expect(res.status).toBe(200);
-      validateWebApiConfigDetailsResponse(res.json);
-      expect(res.json.Success).toBeTruthy();
-    },
-    {
-      label: "WebApiConfigDetails",
-      attachOnPass: true,
-      attachResponseBody: true,
-      context: () => ({
-        exchange: client.getLastExchange(),
-        env: envCfg.name,
-        dns,
-      }),
-    }
-  );
-});
+          // Build payload + call endpoint
+          const body = buildWebApiConfigDetailsRequest(picked.Name, picked.Version, dns);
+          const res = await client.webApiConfigDetails(body);
+
+          expect(res.status).toBe(200);
+          validateWebApiConfigDetailsResponse(res.json);
+          expect(res.json.Success).toBeTruthy();
+        },
+        {
+          label: "WebApiConfigDetails",
+          attachOnPass: true,
+          attachResponseBody: true,
+          context: () => ({
+            exchange: client.getLastExchange(),
+            env: envCfg.name,
+            dns,
+          }),
+        }
+      );
+    });
+  });
