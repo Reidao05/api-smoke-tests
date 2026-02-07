@@ -7,7 +7,7 @@ import { addTestMeta } from "../../src/utils/testMeta";
 
 test.describe("@smoke @critical @cap:assisted-setup", () => {
   test("Assisted Setup → WebApiList contract (WebApi Settings)", async ({ api, envCfg }, testInfo) => {
-    addTestMeta(testInfo, { capability: "assisted-setup", smoke: true, critical: true });
+    addTestMeta(testInfo, { capability: "Assisted-Setup", smoke: true, critical: true });
     //test("webApiList contract", async ({ api, envCfg }, testInfo) => {
       const dns = resolveDns(envCfg);
       const client = new AssistedSetupClient(api);

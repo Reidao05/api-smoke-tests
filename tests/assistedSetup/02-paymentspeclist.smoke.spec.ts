@@ -10,7 +10,7 @@ import { addTestMeta } from "../../src/utils/testMeta";
 
 test.describe("@smoke @critical @cap:assisted-setup", () => {
       test("Assisted Setup → paymentSpecList (discovered APIName/APIVersion)", async ({ api, envCfg }, testInfo) => {
-        addTestMeta(testInfo, { capability: "assisted-setup", smoke: true, critical: true });
+        addTestMeta(testInfo, { capability: "Assisted-Setup", smoke: true, critical: true });
 
       const client = new AssistedSetupClient(api);
       const dns = resolveDns(envCfg);

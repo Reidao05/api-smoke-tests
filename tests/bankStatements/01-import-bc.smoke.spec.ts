@@ -8,7 +8,7 @@ import { addTestMeta } from "../../src/utils/testMeta";
 
 test.describe("@smoke @critical @cap:bank-statements", () => {
     test("Bank Statements → import BC (smoke)", async ({ api, envCfg }, testInfo) => {
-      addTestMeta(testInfo, { capability: "bank-statements", smoke: true, critical: true });
+      addTestMeta(testInfo, { capability: "Bank Statements", smoke: true, critical: true });
       const dns = resolveDns(envCfg);
       const client = new BankStatementsClient(api);
 
@@ -62,3 +62,4 @@ test.describe("@smoke @critical @cap:bank-statements", () => {
       );
     });
   });
+  
